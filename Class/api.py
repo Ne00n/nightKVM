@@ -78,8 +78,8 @@ class API():
         #Generate JobID
         ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         try:
-            self.cursor.execute(f"INSERT INTO jobs (ID, task, node, package) VALUES (%s,%s,%s,%s)",(ID,'deploy',Node,Package))
-            self.cursor.execute(f"INSERT INTO machines (Name, Node) VALUES (%s,%s)",(ID,Node))
+            self.cursor.execute(f"INSERT INTO jobs (ID, Task, Node, Package, User) VALUES (%s,%s,%s,%s,%s)",(ID,'deploy',Node,Package,self.auth['Username']))
+            self.cursor.execute(f"INSERT INTO machines (Name, Node, User) VALUES (%s,%s,%s)",(ID,Node,self.auth['Username']))
             self.connection.commit()
             return f"Job created {ID}"
         except Exception as ex:
