@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import websockets, asyncio, time
+import websockets, asyncio
 
 print("nightKVM cli")
 while True:
