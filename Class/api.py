@@ -1,10 +1,13 @@
-import  pymysql.cursors, random, string, json
+import  pymysql.cursors, random, string, json, re
 
 class API():
 
     def __init__(self,config):
         self.connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
         self.cursor = self.connection.cursor()
+
+    def validateName(self,name):
+        return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)
 
     def getTable(self,table):
         self.cursor.execute(f"SELECT * FROM {table}")
@@ -25,9 +28,13 @@ class API():
     def deploy(self,msg):
         if len(msg.split(" ")) != 3: return "Parameter missing"
         msg, Package, Node = msg.split(" ")
+        #validate node name
+        if not self.validateName(Node): return "Node name invalid."
         #check if node exists
         nodes = self.getRow('nodes',{"Name":Node})
         if not nodes: return "Node not found."
+        #validate package name
+        if not self.validateName(Package): return "Package name invalid."
         #check if package exists
         nodes = self.getRow('packages',{"Name":Package})
         if not nodes: return "Package not found."
