@@ -18,14 +18,18 @@ async def run(remote="127.0.0.1:3000"):
     remote = remote.replace("connect ","")
     uri = f"ws://{remote}"
     print(f"Connecting to {uri}")
-    async with websockets.connect(uri) as websocket:
-        print(f"Connected")
-        while True:
-            userInput = input("")
-            await websocket.send(userInput)
+    try:
+        async with websockets.connect(uri) as websocket:
+            print(f"Connected")
+            while True:
+                userInput = input("")
+                await websocket.send(userInput)
 
-            response = await websocket.recv()
-            print(response)
+                response = await websocket.recv()
+                print(response)
+    except Exception as ex:
+        print("Disconnected")
+        print(ex)
 
 if __name__ == "__main__":
     asyncio.run(run(userInput))
