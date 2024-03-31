@@ -17,6 +17,10 @@ async def handler(websocket):
             cursor.execute("SELECT * FROM packages")
             packages = list(cursor)
             await websocket.send(json.dumps(packages))
+        elif msg == "jobs":
+            cursor.execute("SELECT * FROM jobs")
+            jobs = list(cursor)
+            await websocket.send(json.dumps(jobs))
         elif msg.startswith("deploy"):
             if len(msg.split(" ")) != 3:
                 await websocket.send("Parameter missing")
@@ -31,7 +35,7 @@ async def handler(websocket):
                 print(ex)
                 await websocket.send(f"Failed to create Job")
         elif msg == "help":
-            await websocket.send("Available commands: nodes, packages, deploy <Package> <Node>")
+            await websocket.send("Available commands: nodes, packages, jobs, deploy <Package> <Node>")
         else:
             await websocket.send("Unknown command, try help.")
 
