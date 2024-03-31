@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import  pymysql.cursors, websockets, asyncio, json
+import  pymysql.cursors, websockets, asyncio, random, string, json
 
 print("Loading config")
 with open(f"api.json") as f: config = json.load(f)
@@ -22,7 +22,14 @@ async def handler(websocket):
                 await websocket.send("Parameter missing")
                 continue
             msg, Package, Node = msg.split(" ")
-            await websocket.send(f"Deploying {Package} on Node {Node}")
+            ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            try:
+                cursor.execute(f"INSERT INTO jobs (ID, task, node, package) VALUES (%s,%s,%s,%s)",(ID,'deploy',Node,Package))
+                connection.commit()
+                await websocket.send(f"Job created {ID}")
+            except Exception as ex:
+                print(ex)
+                await websocket.send(f"Failed to create Job")
         elif msg == "help":
             await websocket.send("Available commands: nodes, packages, deploy <Package> <Node>")
         else:
