@@ -13,8 +13,12 @@ async def handler(websocket):
             cursor.execute("SELECT * FROM nodes")
             nodes = list(cursor)
             await websocket.send(json.dumps(nodes))
+        elif msg == "packages":
+            cursor.execute("SELECT * FROM packages")
+            packages = list(cursor)
+            await websocket.send(json.dumps(packages))
         elif msg == "help":
-            await websocket.send("Available commands: nodes")
+            await websocket.send("Available commands: nodes, packages")
         else:
             await websocket.send("Unknown command, try help.")
 
