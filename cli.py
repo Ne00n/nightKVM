@@ -1,8 +1,11 @@
 #!/usr/bin/python3
-import websockets, asyncio
+import websockets, asyncio, sys
 
 print("nightKVM cli")
 while True:
+    if sys.argv[1] == "connect": 
+        userInput = sys.argv[2]
+        break
     userInput = input("")
     if userInput.startswith("connect"):
         break
