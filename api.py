@@ -11,14 +11,17 @@ async def handler(websocket):
         print(msg)
         if msg == "nodes":
             cursor.execute("SELECT * FROM nodes")
+            connection.commit()
             nodes = list(cursor)
             await websocket.send(json.dumps(nodes))
         elif msg == "packages":
             cursor.execute("SELECT * FROM packages")
+            connection.commit()
             packages = list(cursor)
             await websocket.send(json.dumps(packages))
         elif msg == "jobs":
             cursor.execute("SELECT * FROM jobs")
+            connection.commit()
             jobs = list(cursor)
             await websocket.send(json.dumps(jobs))
         elif msg.startswith("deploy"):
