@@ -12,6 +12,8 @@ async def handler(websocket):
             print(msg)
             if msg.startswith("token"): 
                 await websocket.send(daAPI.setToken(msg))
+            elif msg.startswith("login"):
+                await websocket.send(daAPI.setLogin(msg))
             elif not daAPI.isUser and not daAPI.isServer:
                 await websocket.send(daAPI.noAuth())
             elif msg == "jobs":
