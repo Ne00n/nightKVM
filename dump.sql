@@ -13,11 +13,13 @@ CREATE TABLE `jobs` (
 CREATE TABLE `machines` (
   `Name` varchar(20) NOT NULL,
   `Node` varchar(20) NOT NULL,
+  `Username` varchar(20) DEFAULT NULL,
   `Status` int(11) NOT NULL DEFAULT -1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `nodes` (
-  `Name` varchar(20) NOT NULL
+  `Name` varchar(20) NOT NULL,
+  `Token` varchar(33) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `packages` (
@@ -25,6 +27,11 @@ CREATE TABLE `packages` (
   `CPU` int(11) NOT NULL,
   `Memory` int(11) NOT NULL,
   `Disk` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `users` (
+  `Username` varchar(20) NOT NULL,
+  `Password` varchar(60) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -35,7 +42,8 @@ ALTER TABLE `jobs`
 
 ALTER TABLE `machines`
   ADD PRIMARY KEY (`Name`),
-  ADD KEY `machinesNodes` (`Node`);
+  ADD KEY `machinesNodes` (`Node`),
+  ADD KEY `machinesUsers` (`Username`);
 
 ALTER TABLE `nodes`
   ADD PRIMARY KEY (`Name`);
@@ -43,11 +51,15 @@ ALTER TABLE `nodes`
 ALTER TABLE `packages`
   ADD PRIMARY KEY (`Name`);
 
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`Username`);
+
 
 ALTER TABLE `jobs`
   ADD CONSTRAINT `jobsNodes` FOREIGN KEY (`Node`) REFERENCES `nodes` (`Name`) ON UPDATE CASCADE,
   ADD CONSTRAINT `jobsPackages` FOREIGN KEY (`Package`) REFERENCES `packages` (`Name`) ON UPDATE CASCADE;
 
 ALTER TABLE `machines`
-  ADD CONSTRAINT `machinesNodes` FOREIGN KEY (`Node`) REFERENCES `nodes` (`Name`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `machinesNodes` FOREIGN KEY (`Node`) REFERENCES `nodes` (`Name`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `machinesUsers` FOREIGN KEY (`Username`) REFERENCES `users` (`Username`) ON UPDATE CASCADE;
 COMMIT;
