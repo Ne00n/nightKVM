@@ -9,7 +9,7 @@ while True:
     elif userInput == "help":
         print("connect <remote>")
     else:
-        print("Unknown cmd, try help.")
+        print("Unknown command, try help.")
 
 async def run(remote="127.0.0.1:3000"):
     remote = remote.replace("connect ","")
