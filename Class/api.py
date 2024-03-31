@@ -5,14 +5,30 @@ class API():
     def __init__(self,config):
         self.connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
         self.cursor = self.connection.cursor()
+        self.isServer = False
+        self.isUser = False
 
     def validateName(self,name):
         return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)
 
+    def validateToken(self,token):
+        return re.findall(r"^[a-zA-Z:]{33,53}$",token,re.MULTILINE | re.DOTALL)
+
+    def buildResponse(self,status,msg):
+        return json.dumps({"status":status,"msg":msg})
+
+    def noAuth(self):
+        return self.buildResponse("error","No Authentication.")
+
     def getTable(self,table):
-        self.cursor.execute(f"SELECT * FROM {table}")
-        self.connection.commit()
-        return json.dumps(list(self.cursor))
+        if self.isServer:
+            self.cursor.execute(f"SELECT * FROM {table} JOIN nodes ON nodes.name=jobs.node WHERE nodes.Token = %s",(self.auth['Token']))
+            self.connection.commit()
+            return json.dumps(list(self.cursor))
+        else:
+            self.cursor.execute(f"SELECT * FROM {table}")
+            self.connection.commit()
+            return json.dumps(list(self.cursor))
 
     def getRow(self,table,where):
         query = f"SELECT * FROM {table} WHERE "
@@ -24,6 +40,15 @@ class API():
         self.cursor.execute(query,values)
         self.connection.commit()
         return list(self.cursor)
+
+    def setToken(self,msg):
+        if not self.validateToken(msg): return self.buildResponse("error","Token invalid.")
+        cmd, Name, Token = msg.split(":")
+        nodes = self.getRow('nodes',{"Name":Name,"Token":Token})
+        if not nodes: return self.buildResponse("error","Token not found.")
+        self.isServer = True
+        self.auth = {"Name":Name,"Token":Token}
+        return self.buildResponse("ok","Authenticated")
 
     def deploy(self,msg):
         if len(msg.split(" ")) != 3: return "Parameter missing"
