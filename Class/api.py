@@ -5,7 +5,7 @@ class API():
     def __init__(self,config):
         self.connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
         self.cursor = self.connection.cursor()
-        self.isServer = False
+        self.isNode = False
         self.isUser = False
 
     def validateName(self,name):
@@ -15,7 +15,7 @@ class API():
         return json.dumps({"status":status,"msg":msg})
 
     def getTable(self,table):
-        if self.isServer:
+        if self.isNode:
             self.cursor.execute(f"SELECT * FROM {table} JOIN nodes ON nodes.name=jobs.node WHERE nodes.Token = %s",(self.auth['Token']))
             self.connection.commit()
             return json.dumps(list(self.cursor))
