@@ -11,9 +11,27 @@ class API():
         self.connection.commit()
         return json.dumps(list(self.cursor))
 
+    def getRow(self,table,where):
+        query = f"SELECT * FROM {table} WHERE "
+        values = []
+        for index, (key,value) in enumerate(where.items()):
+            query += f"{key} = %s "
+            values.append(value)
+            if index < len(where) -1: query += "AND "
+        self.cursor.execute(query,values)
+        self.connection.commit()
+        return list(self.cursor)
+
     def deploy(self,msg):
         if len(msg.split(" ")) != 3: return "Parameter missing"
         msg, Package, Node = msg.split(" ")
+        #check if node exists
+        nodes = self.getRow('nodes',{"Name":Node})
+        if not nodes: return "Node not found."
+        #check if package exists
+        nodes = self.getRow('packages',{"Name":Package})
+        if not nodes: return "Package not found."
+        #Generate JobID
         ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         try:
             self.cursor.execute(f"INSERT INTO jobs (ID, task, node, package) VALUES (%s,%s,%s,%s)",(ID,'deploy',Node,Package))
