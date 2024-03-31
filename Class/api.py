@@ -12,7 +12,7 @@ class API():
         return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)
 
     def validateToken(self,token):
-        return re.findall(r"^[a-zA-Z:]{33,53}$",token,re.MULTILINE | re.DOTALL)
+        return re.findall(r"^token:[a-zA-Z]{3,20}:[a-zA-Z]{33}$",token,re.MULTILINE | re.DOTALL)
 
     def buildResponse(self,status,msg):
         return json.dumps({"status":status,"msg":msg})
