@@ -35,8 +35,10 @@ class API():
         ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         try:
             self.cursor.execute(f"INSERT INTO jobs (ID, task, node, package) VALUES (%s,%s,%s,%s)",(ID,'deploy',Node,Package))
+            self.cursor.execute(f"INSERT INTO machines (Name, Node) VALUES (%s,%s)",(ID,Node))
             self.connection.commit()
             return f"Job created {ID}"
         except Exception as ex:
             print(ex)
+            self.connection.rollback()
             return f"Failed to create Job"
