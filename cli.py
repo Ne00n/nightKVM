@@ -22,11 +22,11 @@ async def run(remote="127.0.0.1:3000"):
         async with websockets.connect(uri) as websocket:
             print(f"Connected")
             while True:
-                userInput = input("")
-                await websocket.send(userInput)
-
                 response = await websocket.recv()
                 print(response)
+
+                userInput = input("")
+                await websocket.send(userInput)
     except Exception as ex:
         print("Disconnected")
         print(ex)

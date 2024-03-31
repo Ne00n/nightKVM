@@ -7,16 +7,24 @@ with open(f"api.json") as f: config = json.load(f)
 
 async def handler(websocket):
     daAPI = API(config)
+    #Check for Basic Auth, if not disconnect
+    if not 'Authorization' in websocket.request_headers:
+        await websocket.send(daAPI.buildResponse("error","No authentication provided."))
+        return
+
+    #Check if the credentials are valid
+    isAuth = daAPI.auth(websocket.request_headers['Authorization'])
+    #If not, disconnect
+    if not isAuth:
+        await websocket.send(daAPI.buildResponse("error","Invalid credentials."))
+        return
+    else:
+        await websocket.send(daAPI.buildResponse("ok","Authenticated."))
+
     try:
         async for msg in websocket:
             print(msg)
-            if msg.startswith("token"): 
-                await websocket.send(daAPI.setToken(msg))
-            elif msg.startswith("login"):
-                await websocket.send(daAPI.setLogin(msg))
-            elif not daAPI.isUser and not daAPI.isServer:
-                await websocket.send(daAPI.noAuth())
-            elif msg == "jobs":
+            if msg == "jobs":
                 await websocket.send(daAPI.getTable("jobs"))
             elif daAPI.isUser and msg == "nodes":
                 await websocket.send(daAPI.getTable("nodes"))

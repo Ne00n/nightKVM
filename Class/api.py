@@ -1,4 +1,4 @@
-import  pymysql.cursors, random, string, json, re
+import  pymysql.cursors, random, string, base64, json, re
 
 class API():
 
@@ -11,17 +11,8 @@ class API():
     def validateName(self,name):
         return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)
 
-    def validateToken(self,token):
-        return re.findall(r"^token:[a-zA-Z]{3,20}:[a-zA-Z]{33}$",token,re.MULTILINE | re.DOTALL)
-
-    def validateLogin(self,token):
-        return re.findall(r"^login [a-zA-Z]{3,20} [a-zA-Z0-9]{6,60}$",token,re.MULTILINE | re.DOTALL)
-
     def buildResponse(self,status,msg):
         return json.dumps({"status":status,"msg":msg})
-
-    def noAuth(self):
-        return self.buildResponse("error","No Authentication.")
 
     def getTable(self,table):
         if self.isServer:
@@ -44,23 +35,20 @@ class API():
         self.connection.commit()
         return list(self.cursor)
 
-    def setToken(self,msg):
-        if not self.validateToken(msg): return self.buildResponse("error","Token invalid.")
-        cmd, Name, Token = msg.split(":")
-        nodes = self.getRow('nodes',{"Name":Name,"Token":Token})
-        if not nodes: return self.buildResponse("error","Invalid credentials.")
-        self.isServer = True
-        self.auth = {"Name":Name,"Token":Token}
-        return self.buildResponse("ok","Authenticated")
-
-    def setLogin(self,msg):
-        if not self.validateLogin(msg): return self.buildResponse("error","Login invalid.")
-        cmd, Username, Password = msg.split(" ")
+    def auth(self,headers):
+        Basic, header = headers.split(" ")
+        credentials = base64.b64decode(header).decode('utf-8')
+        Username, Password = credentials.split(":")
+        #need to add hashing... later
         users = self.getRow('users',{"Username":Username,"Password":Password})
-        if not users: return self.buildResponse("error","Invalid credentials.")
-        self.isUser = True
-        self.auth = {"Username":Username}
-        return self.buildResponse("ok","Authenticated")
+        nodes = self.getRow('nodes',{"Name":Username,"Token":Password})
+        if users:
+            self.isUser = True
+        elif nodes:
+            self.isNode = True
+        else:
+            return False
+        return True
 
     def deploy(self,msg):
         if len(msg.split(" ")) != 3: return "Parameter missing"
