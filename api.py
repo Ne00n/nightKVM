@@ -8,7 +8,10 @@ async def handler(websocket):
     connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
     cursor = connection.cursor()
     while True:
-        message = await websocket.recv()
+        try:
+            message = await websocket.recv()
+        except:
+            break
         print(message)
 
 
