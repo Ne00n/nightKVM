@@ -39,10 +39,10 @@ class API():
         Basic, header = headers.split(" ")
         credentials = base64.b64decode(header).decode('utf-8')
         Username, Password = credentials.split(":")
-        #need to add hashing... later
-        users = self.getRow('users',{"Username":Username,"Password":Password})
+        users = self.getRow('users',{"Username":Username})
         nodes = self.getRow('nodes',{"Name":Username,"Token":Password})
-        if users:
+        #need to add hashing... later
+        if users and users[0]['Password'] == Password:
             self.isUser = True
         elif nodes:
             self.isNode = True
