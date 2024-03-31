@@ -4,16 +4,17 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `jobs` (
   `ID` varchar(16) NOT NULL,
-  `Task` varchar(10) NOT NULL,
   `Node` varchar(20) NOT NULL,
+  `User` varchar(20) NOT NULL,
   `Package` varchar(20) DEFAULT NULL,
+  `Task` varchar(10) NOT NULL,
   `Status` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `machines` (
   `Name` varchar(20) NOT NULL,
   `Node` varchar(20) NOT NULL,
-  `Username` varchar(20) DEFAULT NULL,
+  `User` varchar(20) DEFAULT NULL,
   `Status` int(11) NOT NULL DEFAULT -1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -38,12 +39,13 @@ CREATE TABLE `users` (
 ALTER TABLE `jobs`
   ADD PRIMARY KEY (`ID`),
   ADD KEY `jobsNodes` (`Node`),
-  ADD KEY `jobsPackages` (`Package`);
+  ADD KEY `jobsPackages` (`Package`),
+  ADD KEY `jobsUsers` (`User`);
 
 ALTER TABLE `machines`
   ADD PRIMARY KEY (`Name`),
   ADD KEY `machinesNodes` (`Node`),
-  ADD KEY `machinesUsers` (`Username`);
+  ADD KEY `machinesUsers` (`User`);
 
 ALTER TABLE `nodes`
   ADD PRIMARY KEY (`Name`);
@@ -57,9 +59,10 @@ ALTER TABLE `users`
 
 ALTER TABLE `jobs`
   ADD CONSTRAINT `jobsNodes` FOREIGN KEY (`Node`) REFERENCES `nodes` (`Name`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `jobsPackages` FOREIGN KEY (`Package`) REFERENCES `packages` (`Name`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `jobsPackages` FOREIGN KEY (`Package`) REFERENCES `packages` (`Name`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `jobsUsers` FOREIGN KEY (`User`) REFERENCES `users` (`Username`) ON UPDATE CASCADE;
 
 ALTER TABLE `machines`
   ADD CONSTRAINT `machinesNodes` FOREIGN KEY (`Node`) REFERENCES `nodes` (`Name`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `machinesUsers` FOREIGN KEY (`Username`) REFERENCES `users` (`Username`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `machinesUsers` FOREIGN KEY (`User`) REFERENCES `users` (`Username`) ON UPDATE CASCADE;
 COMMIT;

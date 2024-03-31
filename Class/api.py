@@ -59,7 +59,7 @@ class API():
         users = self.getRow('users',{"Username":Username,"Password":Password})
         if not users: return self.buildResponse("error","Invalid credentials.")
         self.isUser = True
-        self.auth = {"Username":Username,"Password":Password}
+        self.auth = {"Username":Username}
         return self.buildResponse("ok","Authenticated")
 
     def deploy(self,msg):
