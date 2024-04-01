@@ -44,17 +44,20 @@ class API():
         Basic, Header = headers.split(" ")
         credentials = base64.b64decode(Header).decode('utf-8')
         Username, Password = credentials.split(":")
+        #validate username
+        if not self.validateName(Username): return False,"Username invalid."
+        self.Username = Username
+        #lookup username
         users = self.getRows(f'SELECT * FROM users WHERE Username = %s',(Username))
         nodes = self.getRows(f'SELECT * FROM nodes WHERE Name = %s',(Username))
-        self.Username = Username
         #need to add hashing... later
         if users and users[0]['Password'] == Password:
             self.isUser = True
         elif nodes and nodes[0]['Token'] == Password:
             self.isNode = True
         else:
-            return False
-        return True
+            return False,"Invalid credentials."
+        return True,"Authenticated."
 
     def deploy(self,msg):
         if len(msg.split(" ")) != 3: return "Parameter missing"

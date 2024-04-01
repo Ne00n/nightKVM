@@ -13,13 +13,13 @@ async def handler(websocket):
         return
 
     #Check if the credentials are valid
-    isAuth = daAPI.auth(websocket.request_headers['Authorization'])
+    isAuth,msg = daAPI.auth(websocket.request_headers['Authorization'])
     #If not, disconnect
     if not isAuth:
-        await websocket.send(daAPI.buildResponse("error","Invalid credentials."))
+        await websocket.send(daAPI.buildResponse("error",msg))
         return
     else:
-        await websocket.send(daAPI.buildResponse("ok","Authenticated."))
+        await websocket.send(daAPI.buildResponse("ok",msg))
 
     try:
         async for msg in websocket:
