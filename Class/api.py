@@ -11,6 +11,9 @@ class API():
     def validateName(self,name):
         return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)
 
+    def validBasic(self,basic):
+        return re.findall(r"^Basic\s[A-Za-z0-9=]{3,64}$",basic,re.MULTILINE | re.DOTALL) 
+
     def buildResponse(self,status,msg):
         return json.dumps({"status":status,"msg":msg})
 
@@ -41,8 +44,12 @@ class API():
         return list(self.cursor)
 
     def auth(self,headers):
+        if not self.validBasic(headers): return False,"Invalid basic header."
         Basic, Header = headers.split(" ")
-        credentials = base64.b64decode(Header).decode('utf-8')
+        try:
+            credentials = base64.b64decode(Header).decode('utf-8')
+        except:
+            return False,"Invalid base64."
         Username, Password = credentials.split(":")
         #validate username
         if not self.validateName(Username): return False,"Username invalid."
