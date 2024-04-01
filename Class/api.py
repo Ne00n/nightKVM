@@ -14,15 +14,11 @@ class API():
     def buildResponse(self,status,msg):
         return json.dumps({"status":status,"msg":msg})
 
-    def getTable(self,table):
+    def getJobs(self):
         if self.isNode:
-            self.cursor.execute(f"SELECT * FROM {table} JOIN nodes ON nodes.name=jobs.node WHERE nodes.Token = %s",(self.auth['Token']))
-            self.connection.commit()
-            return json.dumps(list(self.cursor))
+            return json.dumps(self.getRow('jobs',{"Node":self.Username,"Status":0}))
         else:
-            self.cursor.execute(f"SELECT * FROM {table}")
-            self.connection.commit()
-            return json.dumps(list(self.cursor))
+            return json.dumps(self.getRow('jobs',{"User":self.Username}))
 
     def getRow(self,table,where):
         query = f"SELECT * FROM {table} WHERE "
@@ -41,6 +37,7 @@ class API():
         Username, Password = credentials.split(":")
         users = self.getRow('users',{"Username":Username})
         nodes = self.getRow('nodes',{"Name":Username,"Token":Password})
+        self.Username = Username
         #need to add hashing... later
         if users and users[0]['Password'] == Password:
             self.isUser = True
@@ -66,8 +63,8 @@ class API():
         #Generate JobID
         ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         try:
-            self.cursor.execute(f"INSERT INTO jobs (ID, Task, Node, Package, User) VALUES (%s,%s,%s,%s,%s)",(ID,'deploy',Node,Package,self.auth['Username']))
-            self.cursor.execute(f"INSERT INTO machines (Name, Node, User) VALUES (%s,%s,%s)",(ID,Node,self.auth['Username']))
+            self.cursor.execute(f"INSERT INTO jobs (ID, Task, Node, Package, User) VALUES (%s,%s,%s,%s,%s)",(ID,'deploy',Node,Package,self.Username))
+            self.cursor.execute(f"INSERT INTO machines (Name, Node, User) VALUES (%s,%s,%s)",(ID,Node,self.Username))
             self.connection.commit()
             return f"Job created {ID}"
         except Exception as ex:
