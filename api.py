@@ -26,9 +26,9 @@ async def handler(websocket):
             print(msg)
             if msg == "jobs":
                 await websocket.send(daAPI.getJobs())
-            elif daAPI.isUser and msg == "nodes":
+            elif msg == "nodes":
                 await websocket.send(daAPI.getNodes())
-            elif daAPI.isUser and msg == "packages":
+            elif msg == "packages":
                 await websocket.send(daAPI.getPackages())
             elif daAPI.isUser and msg.startswith("deploy"):
                 await websocket.send(daAPI.deploy(msg))
