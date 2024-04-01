@@ -2,11 +2,16 @@ import  pymysql.cursors, random, string, base64, json, re
 
 class API():
 
+    mysql = True
+    isNode = False
+    isUser = False
+
     def __init__(self,config):
-        self.connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
-        self.cursor = self.connection.cursor()
-        self.isNode = False
-        self.isUser = False
+        try:
+            self.connection = pymysql.connect(host=config['mysql']['host'],user=config['mysql']['username'],password=config['mysql']['password'],database=config['mysql']['database'],cursorclass=pymysql.cursors.DictCursor)
+            self.cursor = self.connection.cursor()
+        except:
+            self.mysql = False
 
     def validateName(self,name):
         return re.findall(r"^[A-Za-z]{3,20}$",name,re.MULTILINE | re.DOTALL)

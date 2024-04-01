@@ -7,6 +7,9 @@ with open(f"api.json") as f: config = json.load(f)
 
 async def handler(websocket):
     daAPI = API(config)
+    if not daAPI.mysql:
+        await websocket.send(daAPI.buildResponse("error","Database unreachable."))
+        return
     #Check for Basic Auth, if not disconnect
     if not 'Authorization' in websocket.request_headers:
         await websocket.send(daAPI.buildResponse("error","No authentication provided."))
