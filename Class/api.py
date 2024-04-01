@@ -23,6 +23,9 @@ class API():
     def getNodes(self):
         return json.dumps(self.getRows('SELECT Name FROM nodes'))
 
+    def getPackages(self):
+        return json.dumps(self.getRows('SELECT * FROM packages'))
+
     def getRows(self,query,values=[]):
         if values:
             self.cursor.execute(query,values)
