@@ -26,6 +26,12 @@ class API():
     def getPackages(self):
         return json.dumps(self.getRows('SELECT * FROM packages'))
 
+    def getMachines(self):
+        if self.isNode:
+            return json.dumps(self.getRows(f'SELECT * FROM machines WHERE Node = %s',(self.Username)))
+        else:
+            return json.dumps(self.getRows(f'SELECT * FROM machines WHERE User = %s',(self.Username)))
+
     def getRows(self,query,values=[]):
         if values:
             self.cursor.execute(query,values)
