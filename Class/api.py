@@ -20,6 +20,9 @@ class API():
         else:
             return json.dumps(self.getRows(f'SELECT * FROM jobs WHERE User = %s',(self.Username)))
 
+    def getNodes(self):
+        return json.dumps(self.getRows('SELECT Name FROM nodes'))
+
     def getRows(self,query,values=[]):
         if values:
             self.cursor.execute(query,values)
