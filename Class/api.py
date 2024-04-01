@@ -16,32 +16,29 @@ class API():
 
     def getJobs(self):
         if self.isNode:
-            return json.dumps(self.getRow('jobs',{"Node":self.Username,"Status":0}))
+            return json.dumps(self.getRows(f'SELECT * FROM jobs WHERE Node = %s AND Status = 0',(self.Username)))
         else:
-            return json.dumps(self.getRow('jobs',{"User":self.Username}))
+            return json.dumps(self.getRows(f'SELECT * FROM jobs WHERE User = %s',(self.Username)))
 
-    def getRow(self,table,where):
-        query = f"SELECT * FROM {table} WHERE "
-        values = []
-        for index, (key,value) in enumerate(where.items()):
-            query += f"{key} = %s "
-            values.append(value)
-            if index < len(where) -1: query += "AND "
-        self.cursor.execute(query,values)
+    def getRows(self,query,values=[]):
+        if values:
+            self.cursor.execute(query,values)
+        else:
+            self.cursor.execute(query)
         self.connection.commit()
         return list(self.cursor)
 
     def auth(self,headers):
-        Basic, header = headers.split(" ")
-        credentials = base64.b64decode(header).decode('utf-8')
+        Basic, Header = headers.split(" ")
+        credentials = base64.b64decode(Header).decode('utf-8')
         Username, Password = credentials.split(":")
-        users = self.getRow('users',{"Username":Username})
-        nodes = self.getRow('nodes',{"Name":Username,"Token":Password})
+        users = self.getRows(f'SELECT * FROM users WHERE Username = %s',(Username))
+        nodes = self.getRows(f'SELECT * FROM nodes WHERE Name = %s',(Username))
         self.Username = Username
         #need to add hashing... later
         if users and users[0]['Password'] == Password:
             self.isUser = True
-        elif nodes:
+        elif nodes and nodes[0]['Token'] == Password:
             self.isNode = True
         else:
             return False
@@ -53,13 +50,13 @@ class API():
         #validate node name
         if not self.validateName(Node): return "Node name invalid."
         #check if node exists
-        nodes = self.getRow('nodes',{"Name":Node})
+        nodes = self.getRows(f'SELECT * FROM nodes WHERE Name = %s',(Node))
         if not nodes: return "Node not found."
         #validate package name
         if not self.validateName(Package): return "Package name invalid."
         #check if package exists
-        nodes = self.getRow('packages',{"Name":Package})
-        if not nodes: return "Package not found."
+        packages = self.getRows(f'SELECT * FROM packages WHERE Name = %s',(Package))
+        if not packages: return "Package not found."
         #Generate JobID
         ID = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
         try:
